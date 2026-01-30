@@ -33,6 +33,9 @@ class Token:
     
     def __repr__(self):
         return f"Token({self.type.name}, {self.lexeme!r}, {self.literal!r})"
+    
+    def __str__(self):
+        return self.__repr__
 
         
 
