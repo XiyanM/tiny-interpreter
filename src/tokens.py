@@ -23,6 +23,8 @@ class TokenType(Enum):
     SLASH = auto()
     STAR = auto()
 
+    EOF = auto()
+
 
 class Token:
     def __init__(self, token_type: TokenType, lexeme: str, literal, line: int):
@@ -35,7 +37,7 @@ class Token:
         return f"Token({self.type.name}, {self.lexeme!r}, {self.literal!r})"
     
     def __str__(self):
-        return self.__repr__
+        return self.__repr__()
 
         
 
