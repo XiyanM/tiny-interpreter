@@ -1,4 +1,7 @@
+from __future__ import annotations
 from enum import Enum, auto
+from typing import Any
+from dataclasses import dataclass
 
 class TokenType(Enum):
     #Keywords
@@ -25,14 +28,13 @@ class TokenType(Enum):
 
     EOF = auto()
 
-
+@dataclass(frozen=True)
 class Token:
-    def __init__(self, token_type: TokenType, lexeme: str, literal, line: int):
-        self.type = token_type
-        self.lexeme = lexeme
-        self.literal = literal
-        self.line = line
-    
+    type: TokenType
+    lexeme: str
+    literal: Any
+    line: int
+
     def __repr__(self):
         return f"Token({self.type.name}, {self.lexeme!r}, {self.literal!r})"
     
