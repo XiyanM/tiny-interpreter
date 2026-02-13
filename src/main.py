@@ -1,10 +1,24 @@
 from .lexer import Lexer
+from .parser import Parser
+from .ast_printer import AstPrinter
+
+
+DEBUG_TOKENS = False
 
 def run(source: str):
     scanner = Lexer(source)
     tokens = scanner.scan_tokens()
-    for token in tokens:
-        print(token)
+
+    if DEBUG_TOKENS:
+        for token in tokens:
+            print(token)
+        return
+    
+    parser = Parser(tokens)
+    expr = parser.parse()
+
+    printer = AstPrinter()
+    print(printer.print(expr))
 
 
 def repl():

@@ -1,4 +1,4 @@
-from future import __annotations__ # type: ignore
+from __future__ import annotations # type: ignore
 from typing import List
 from .tokens import Token, TokenType
 from .ast_nodes import Literal, Binary, Expr, Grouping
@@ -36,6 +36,7 @@ class Parser:
             op = self.previous()
             right = self.primary()
             expr = Binary(expr, op, right)
+        return expr
 
     def primary(self):
         if self.match(TokenType.NUMBER):
