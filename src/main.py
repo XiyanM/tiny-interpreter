@@ -1,9 +1,11 @@
 from .lexer import Lexer
 from .parser import Parser
 from .ast_printer import AstPrinter
+from .interpreter import Interpreter
 
 
 DEBUG_TOKENS = False
+DEBUG_AST = False
 
 def run(source: str):
     scanner = Lexer(source)
@@ -17,8 +19,14 @@ def run(source: str):
     parser = Parser(tokens)
     expr = parser.parse()
 
-    printer = AstPrinter()
-    print(printer.print(expr))
+    if DEBUG_AST:
+        printer = AstPrinter()
+        print(printer.print(expr))
+        return
+    
+    interpreter = Interpreter()
+    result = interpreter.evaluate(expr)
+    print(result)
 
 
 def repl():
