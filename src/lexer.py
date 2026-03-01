@@ -12,7 +12,9 @@ class Lexer:
 
         self.keywords = {
             "var": TokenType.VAR,
-            "print": TokenType.PRINT
+            "print": TokenType.PRINT,
+            "true": TokenType.TRUE,
+            "false": TokenType.FALSE
         }
 
     def is_at_end(self) -> bool:
@@ -60,6 +62,32 @@ class Lexer:
             self.number()
         elif ch.isalpha() or ch == "_":
             self.identifier()
+        elif ch == "!":
+            if self.peek() == "=":
+                self.advance()
+                self.add_token(TokenType.BANG_EQUAL)
+            else:
+                self.add_token(TokenType.BANG)
+        elif ch == ">":
+            if self.peek() == "=":
+                self.advance()
+                self.add_token(TokenType.GREATER_EQUAL)
+            else:
+                self.add_token(TokenType.GREATER)
+        elif ch == "<":
+            if self.peek() == "=":
+                self.advance()
+                self.add_token(TokenType.LESS_EQUAL)
+            else:
+                self.add_token(TokenType.LESS)
+        elif ch == "=":
+            if self.peek() == "=":
+                self.advance()
+                self.add_token(TokenType.EQUAL_EQUAL)
+            else:
+                raise SyntaxError(f"Unexpected character on line {self.line}")
+
+
         else:
             raise SyntaxError(f"Unexpected character on line {self.line}")
         
