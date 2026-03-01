@@ -1,7 +1,7 @@
 from __future__ import annotations # type: ignore
 from typing import List
 from .tokens import Token, TokenType
-from .ast_nodes import Literal, Binary, Expr, Grouping
+from .ast_nodes import Literal, Binary, Expr, Grouping, Unary
 
 class ParseError(Exception):
     pass
@@ -17,7 +17,28 @@ class Parser:
         return expr
     
     def expression(self) -> Expr:
-        return self.term()
+        return self.equality()
+
+    def equality(self) -> Expr:
+        expr = self.comparison()
+
+        while self.match(TokenType.EQUAL_EQUAL, TokenType.BANG_EQUAL):
+            op = self.previous()
+            right = self.comparison()
+            expr = Binary(expr, op, right)
+        
+        return expr
+
+    def comparison(self) -> Expr:
+        expr = self.term()
+
+        while self.match(TokenType.GREATER_EQUAL, TokenType.GREATER, TokenType.LESS, TokenType.LESS_EQUAL):
+            op = self.previous()
+            right = self.term()
+            expr = Binary(expr, op, right)
+        
+        return expr
+        
 
     def term(self) -> Expr:
         expr = self.factor()
@@ -30,18 +51,37 @@ class Parser:
         return expr
 
     def factor(self):
-        expr = self.primary()
+        expr = self.unary()
 
         while self.match(TokenType.STAR, TokenType.SLASH):
             op = self.previous()
-            right = self.primary()
+            right = self.unary()
             expr = Binary(expr, op, right)
         return expr
 
+    def unary(self):
+        while self.match(TokenType.BANG, TokenType.MINUS):
+            op = self.previous()
+            right = self.unary()
+            return Unary(op, right)
+        return self.primary()
+        
+
+
     def primary(self):
-        if self.match(TokenType.NUMBER):
+        if self.match(TokenType.NUMBER, TokenType.STRING):
             value = self.previous().literal
             return Literal(value)
+
+        if self.match(TokenType.TRUE):
+            return Literal(True)
+        
+        if self.match(TokenType.FALSE):
+            return Literal(False)
+    
+        if self.match(TokenType.NIL):
+            return Literal(None)
+        
         
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()

@@ -22,6 +22,10 @@ class Binary(Expr):
 class Grouping(Expr):
     expression: Expr
 
+@dataclass(frozen=True)
+class Unary(Expr):
+    op: Token
+    right: Expr
 
 
 

@@ -7,6 +7,9 @@ class TokenType(Enum):
     #Keywords
     VAR = auto()
     PRINT = auto()
+    TRUE = auto()
+    FALSE = auto()
+    NIL = auto()
 
     #Literals
     IDENTIFIER = auto()
@@ -25,7 +28,16 @@ class TokenType(Enum):
     SEMICOLON = auto()
     SLASH = auto()
     STAR = auto()
+    BANG = auto() #!
+    LESS = auto() #<
+    GREATER = auto() #>
 
+    #one or two char tokens
+    BANG_EQUAL = auto() # !=
+    EQUAL_EQUAL = auto() # ==
+    LESS_EQUAL = auto() #<=
+    GREATER_EQUAL = auto() #>=
+    
     EOF = auto()
 
 @dataclass(frozen=True)
