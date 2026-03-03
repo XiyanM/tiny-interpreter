@@ -2,6 +2,7 @@ from __future__ import annotations # type: ignore
 from typing import List
 from .tokens import Token, TokenType
 from .ast_nodes import Literal, Binary, Expr, Grouping, Unary
+from .stmt_nodes import Statement, VarStmt, IfStmt, WhileStmt, BlockStmt, PrintStmt, FunctionStmt, ReturnStmt
 
 class ParseError(Exception):
     pass
@@ -11,11 +12,85 @@ class Parser:
         self.current = 0
         self.tokens = tokens
 
-    def parse(self) -> Expr:
-        expr = self.expression()
-        self.consume(TokenType.EOF, "Expect end of expression")
-        return expr
+    def parse(self) -> List[Statement]:
+        statements = []
+
+        while not self.is_at_end():
+            statements.append(self.declaration())
+
+        return statements
     
+    #statement grammar
+    def declaration(self) -> Statement:
+        if self.match(TokenType.VAR):
+            return self.var_declaration()
+        return self.statement()
+
+
+    def statement(self) -> Statement:
+        if self.match(TokenType.PRINT):
+            return self.print_statement()
+        if self.match(TokenType.IF):
+            return self.if_statement()
+        if self.match(TokenType.WHILE):
+            return self.while_statement()
+        if self.match(TokenType.LEFT_BRACE):
+            return self.block()
+        
+        return self.expression_statement()
+
+    def var_declaration(self) -> Statement:
+        name = self.consume(TokenType.IDENTIFIER, "Expect variable name")
+
+        initialiser = None
+        if self.match(TokenType.EQUAL):
+            initialiser = self.expression()
+        
+        self.consume(TokenType.SEMICOLON, "Expect ; after variable declaration")
+        return VarStmt(name, initialiser)
+    
+    def print_statement(self) -> Statement:
+        expression = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ; after value")
+
+        return PrintStmt(expression)
+    
+    def if_statement(self) -> Statement:
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
+
+        then_branch = self.statement()
+        else_branch = None
+        if self.match(TokenType.ELSE):
+            else_branch = self.statement()
+        
+        return IfStmt(condition, then_branch, else_branch)
+    
+    def while_statement(self) -> Statement:
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition'.")
+
+        body = self.statement()
+
+        return WhileStmt(condition, body)
+    
+    def block(self) -> Statement:
+        statements = []
+        while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
+            statements.append(self.declaration())
+
+        self.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+
+        return BlockStmt(statements)
+
+
+
+
+
+
+    #expression grammar
     def expression(self) -> Expr:
         return self.equality()
 
@@ -39,7 +114,6 @@ class Parser:
         
         return expr
         
-
     def term(self) -> Expr:
         expr = self.factor()
 
@@ -65,8 +139,6 @@ class Parser:
             right = self.unary()
             return Unary(op, right)
         return self.primary()
-        
-
 
     def primary(self):
         if self.match(TokenType.NUMBER, TokenType.STRING):
@@ -81,7 +153,6 @@ class Parser:
     
         if self.match(TokenType.NIL):
             return Literal(None)
-        
         
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()

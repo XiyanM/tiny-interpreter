@@ -10,6 +10,12 @@ class TokenType(Enum):
     TRUE = auto()
     FALSE = auto()
     NIL = auto()
+    RETURN = auto()
+    IF = auto()
+    WHILE = auto()
+    ELSE = auto()
+    EQUAL = auto()
+
 
     #Literals
     IDENTIFIER = auto()
