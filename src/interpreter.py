@@ -1,13 +1,75 @@
 from __future__ import annotations
 from .ast_nodes import Literal, Grouping, Binary, Expr, Unary
-from typing import Any
+from typing import Any, List
 from .tokens import TokenType
+from .stmt_nodes import Statement, PrintStmt, VarStmt, ExprStmt, BlockStmt, WhileStmt, IfStmt
+from .environment import Environment
 
 
 class RuntimeError_(Exception):
     pass 
 
 class Interpreter:
+    def __init__(self):
+        self.env = Environment()
+    def interpret(self, statements:List[Statement]):
+        for statement in statements:
+            self._execute(statement)
+        return
+
+
+
+    def _execute(self, statement: Statement):
+        if isinstance(statement, PrintStmt):
+            expr = self.evaluate(statement.expression)
+            return print(self._stringify(expr))
+        
+        if isinstance(statement, ExprStmt):
+            self.evaluate(statement.expression)
+            return
+        
+        if isinstance(statement, VarStmt):
+            expr = None
+            if statement.initialiser:
+                expr = self.evaluate(statement.initialiser)
+            
+            return
+
+        if isinstance(statement, WhileStmt):
+            while self._is_truthy(self.evaluate(statement.condition)):
+                self._execute(statement.body)
+            return
+        
+        if isinstance(statement, IfStmt):
+            condition = self.evaluate(statement.condition)
+            if self._is_truthy(condition):
+                self._execute(statement.then_branch)
+            else:
+                if statement.else_branch:
+                    self._execute(statement.else_branch)
+            return
+        
+        if isinstance(statement, BlockStmt):
+            prev = self.env
+            self.env = Environment(enclosing=prev)
+            for statement in statement.statements:
+                self._execute(statement)
+            self.env = prev
+            return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def evaluate(self, expr: Expr) -> Any:
         return self._eval(expr)
 
@@ -102,6 +164,22 @@ class Interpreter:
         if value is False:
             return False
         return True
+    
+    def _stringify(self, value: Any) -> str:
+        if value is None:
+            return "nil"
+        
+        if value is True:
+            return "true"
+        
+        if value is False:
+            return "false"
+        
+        if isinstance(value, float):
+            if value.is_integer():
+                return str(int(value))
+        
+        return str(value)
 
 
 

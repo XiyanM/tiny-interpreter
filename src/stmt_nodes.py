@@ -10,16 +10,16 @@ class Statement:
 
 @dataclass(frozen=True)
 class ExprStmt(Statement):
-    expression = Expr
+    expression: Expr
 
 @dataclass(frozen=True)
 class VarStmt(Statement):
-    name = Token
-    initialiser = Optional[Expr]
+    name: Token
+    initialiser: Optional[Expr]
 
 @dataclass(frozen=True)
 class PrintStmt(Statement):
-    expression = Expr
+    expression: Expr
 
 @dataclass(frozen=True)
 class BlockStmt(Statement):
@@ -27,25 +27,25 @@ class BlockStmt(Statement):
 
 @dataclass(frozen=True)
 class IfStmt(Statement):
-    condition = Expr
-    then_branch = Statement
-    else_branch = Optional[Statement]
+    condition: Expr
+    then_branch: Statement
+    else_branch: Optional[Statement]
 
 @dataclass(frozen=True)
 class WhileStmt(Statement):
-    condition = Expr
-    body = Statement
+    condition: Expr
+    body: Statement
 
 @dataclass(frozen=True)
 class FunctionStmt(Statement):
-    name = Token
-    param = List[Token]
-    body = List[Statement]
+    name: Token
+    param: List[Token]
+    body: List[Statement]
 
 @dataclass(frozen=True)
 class ReturnStmt(Statement):
-    keyword = Token
-    value = Optional[Expr]
+    keyword: Token
+    value: Optional[Expr]
 
 
 

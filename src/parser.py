@@ -2,7 +2,7 @@ from __future__ import annotations # type: ignore
 from typing import List
 from .tokens import Token, TokenType
 from .ast_nodes import Literal, Binary, Expr, Grouping, Unary
-from .stmt_nodes import Statement, VarStmt, IfStmt, WhileStmt, BlockStmt, PrintStmt, FunctionStmt, ReturnStmt
+from .stmt_nodes import Statement, VarStmt, IfStmt, WhileStmt, BlockStmt, PrintStmt, FunctionStmt, ReturnStmt, ExprStmt
 
 class ParseError(Exception):
     pass
@@ -84,7 +84,12 @@ class Parser:
         self.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
 
         return BlockStmt(statements)
+    
+    def expression_statement(self) -> Statement:
+        expr = self.expression()
+        self.consume(TokenType.SEMICOLON, "expect ';' after expression.")
 
+        return ExprStmt(expr)
 
 
 
