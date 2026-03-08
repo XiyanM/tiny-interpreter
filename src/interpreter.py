@@ -73,7 +73,6 @@ class Interpreter:
 
 
     #EXPRESSION INTERPRETER
-
     def evaluate(self, expr: Expr) -> Any:
         return self._eval(expr)
 

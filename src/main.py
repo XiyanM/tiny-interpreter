@@ -21,7 +21,7 @@ def run(source: str):
 
     if DEBUG_AST:
         printer = AstPrinter()
-        print(printer.print(expr))
+        print(printer.print_program(statements))
         return
     
     interpreter = Interpreter()
