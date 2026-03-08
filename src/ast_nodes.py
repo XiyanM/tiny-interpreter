@@ -27,5 +27,11 @@ class Unary(Expr):
     op: Token
     right: Expr
 
+@dataclass(frozen=True)
+class Variable(Expr):
+    name: Token
 
-
+@dataclass(frozen=True)
+class Assign(Expr):
+    name: Token
+    value: Expr

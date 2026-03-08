@@ -14,7 +14,13 @@ class Lexer:
             "var": TokenType.VAR,
             "print": TokenType.PRINT,
             "true": TokenType.TRUE,
-            "false": TokenType.FALSE
+            "false": TokenType.FALSE,
+            "nil": TokenType.NIL,
+            "if": TokenType.IF,
+            "else": TokenType.ELSE,
+            "while": TokenType.WHILE,
+            "fun": TokenType.FUN,        # if you included this TokenType
+            "return": TokenType.RETURN,
         }
 
     def is_at_end(self) -> bool:
@@ -85,7 +91,7 @@ class Lexer:
                 self.advance()
                 self.add_token(TokenType.EQUAL_EQUAL)
             else:
-                raise SyntaxError(f"Unexpected character on line {self.line}")
+                self.add_token(TokenType.EQUAL)
 
 
         else:

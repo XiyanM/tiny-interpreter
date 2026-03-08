@@ -1,5 +1,5 @@
 from __future__ import annotations
-from .ast_nodes import Literal, Grouping, Binary, Expr, Unary
+from .ast_nodes import Literal, Grouping, Binary, Expr, Unary, Variable, Assign
 from typing import Any, List
 from .tokens import TokenType
 from .stmt_nodes import Statement, PrintStmt, VarStmt, ExprStmt, BlockStmt, WhileStmt, IfStmt
@@ -18,7 +18,7 @@ class Interpreter:
         return
 
 
-
+    #STATEMENT INTERPRETER
     def _execute(self, statement: Statement):
         if isinstance(statement, PrintStmt):
             expr = self.evaluate(statement.expression)
@@ -32,7 +32,7 @@ class Interpreter:
             expr = None
             if statement.initialiser:
                 expr = self.evaluate(statement.initialiser)
-            
+            self.env.define(statement.name.lexeme, expr)
             return
 
         if isinstance(statement, WhileStmt):
@@ -52,10 +52,14 @@ class Interpreter:
         if isinstance(statement, BlockStmt):
             prev = self.env
             self.env = Environment(enclosing=prev)
-            for statement in statement.statements:
-                self._execute(statement)
-            self.env = prev
+            try:
+                for stmt in statement.statements:
+                    self._execute(stmt)
+            finally:
+                self.env = prev
             return
+        
+        raise RuntimeError_(f"Unknown Statement node: {type(statement)}")
 
 
 
@@ -68,7 +72,7 @@ class Interpreter:
 
 
 
-
+    #EXPRESSION INTERPRETER
 
     def evaluate(self, expr: Expr) -> Any:
         return self._eval(expr)
@@ -92,6 +96,15 @@ class Interpreter:
                 return not self._is_truthy(right)
 
             raise RuntimeError_(f"Unknown unary operator: {expr.op.lexeme}")
+        
+        if isinstance(expr, Variable):
+            return self.env.get(expr.name)
+
+
+        if isinstance(expr, Assign):
+            rhs = self._eval(expr.value)
+            self.env.assign(expr.name, rhs)
+            return rhs
 
 
 

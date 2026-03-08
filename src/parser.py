@@ -1,7 +1,7 @@
 from __future__ import annotations # type: ignore
 from typing import List
 from .tokens import Token, TokenType
-from .ast_nodes import Literal, Binary, Expr, Grouping, Unary
+from .ast_nodes import Literal, Binary, Expr, Grouping, Unary, Variable, Assign
 from .stmt_nodes import Statement, VarStmt, IfStmt, WhileStmt, BlockStmt, PrintStmt, FunctionStmt, ReturnStmt, ExprStmt
 
 class ParseError(Exception):
@@ -97,7 +97,21 @@ class Parser:
 
     #expression grammar
     def expression(self) -> Expr:
-        return self.equality()
+        return self.assignment()
+    
+    def assignment(self) -> Expr:
+        expr = self.equality()
+        if self.match(TokenType.EQUAL):
+            equals = self.previous()
+            value = self.assignment()
+
+            if isinstance(expr, Variable):
+                name = expr.name
+                return Assign(name, value)
+            
+            raise self.error(equals, "Invalid assignment target.")
+        return expr
+
 
     def equality(self) -> Expr:
         expr = self.comparison()
@@ -163,6 +177,9 @@ class Parser:
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN, "Expect ) after expression")
             return Grouping(expr)
+        
+        if self.match(TokenType.IDENTIFIER):
+            return Variable(self.previous())
         
         raise self.error(self.peek(), "Expect expression.")
     

@@ -17,7 +17,7 @@ def run(source: str):
         return
     
     parser = Parser(tokens)
-    expr = parser.parse()
+    statements = parser.parse()
 
     if DEBUG_AST:
         printer = AstPrinter()
@@ -25,8 +25,7 @@ def run(source: str):
         return
     
     interpreter = Interpreter()
-    result = interpreter.evaluate(expr)
-    print(result)
+    interpreter.interpret(statements)
 
 
 def repl():

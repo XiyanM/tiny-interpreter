@@ -14,7 +14,7 @@ class TokenType(Enum):
     IF = auto()
     WHILE = auto()
     ELSE = auto()
-    EQUAL = auto()
+    FUN = auto()
 
 
     #Literals
@@ -37,6 +37,7 @@ class TokenType(Enum):
     BANG = auto() #!
     LESS = auto() #<
     GREATER = auto() #>
+    EQUAL = auto()
 
     #one or two char tokens
     BANG_EQUAL = auto() # !=
