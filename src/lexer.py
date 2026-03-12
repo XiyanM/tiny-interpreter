@@ -62,6 +62,8 @@ class Lexer:
             self.add_token(TokenType.SLASH)
         elif ch in (" ", "\r", "\t"):
             pass
+        elif ch == '"':
+            self.string()
         elif ch == "\n":
             self.line += 1
         elif ch.isdigit():
@@ -127,6 +129,20 @@ class Lexer:
         value = self.text[self.start:self.current]
         token_type = self.keywords.get(value, TokenType.IDENTIFIER)
         self.add_token(token_type)
+
+    def string(self):
+        while self.peek() != '"' and not self.is_at_end():
+            if self.peek() == "\n":
+                raise SyntaxError(f"Unterminated string on line {self.line}")
+            self.advance()
+
+        if self.is_at_end():
+            raise SyntaxError(f"Unterminated string on line {self.line}")
+
+        self.advance()
+
+        value = self.text[self.start + 1 : self.current - 1]
+        self.add_token(TokenType.STRING, value)
 
 
 
