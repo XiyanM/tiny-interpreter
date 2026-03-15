@@ -1,7 +1,7 @@
 from __future__ import annotations # type: ignore
 from typing import List
 from .tokens import Token, TokenType
-from .ast_nodes import Literal, Binary, Expr, Grouping, Unary, Variable, Assign
+from .ast_nodes import Literal, Binary, Expr, Grouping, Unary, Variable, Assign, Call
 from .stmt_nodes import Statement, VarStmt, IfStmt, WhileStmt, BlockStmt, PrintStmt, FunctionStmt, ReturnStmt, ExprStmt
 
 class ParseError(Exception):
@@ -24,6 +24,8 @@ class Parser:
     def declaration(self) -> Statement:
         if self.match(TokenType.VAR):
             return self.var_declaration()
+        if self.match(TokenType.FUN):
+            return self.func_declaration()
         return self.statement()
 
 
@@ -48,6 +50,27 @@ class Parser:
         
         self.consume(TokenType.SEMICOLON, "Expect ; after variable declaration")
         return VarStmt(name, initialiser)
+    
+    def func_declaration(self) -> Statement:
+        name = self.consume(TokenType.IDENTIFIER, "Expect fucntion name")
+        param = []
+        funcbody = []
+
+        if not self.check(TokenType.RIGHT_PAREN):
+            self.consume(TokenType.LEFT_PAREN, "Expect '(' after function name.")
+            while True:
+                param.append(self.consume(TokenType.IDENTIFIER, "Expect parameter name."))
+                if not self.match(TokenType.COMMA):
+                    break
+
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after function parameters.")
+
+        self.consume(TokenType.LEFT_BRACE, "Expect '{' before function body.")
+        funcbody = self.block()
+
+        return FunctionStmt(name, param, funcbody.statements)
+
+
     
     def print_statement(self) -> Statement:
         expression = self.expression()
@@ -90,6 +113,8 @@ class Parser:
         self.consume(TokenType.SEMICOLON, "expect ';' after expression.")
 
         return ExprStmt(expr)
+    
+    
 
 
 
@@ -157,7 +182,22 @@ class Parser:
             op = self.previous()
             right = self.unary()
             return Unary(op, right)
-        return self.primary()
+        return self.call()
+    
+    def call(self):
+        expr = self.primary()
+        while self.match(TokenType.LEFT_PAREN):
+            args = []
+
+            if not self.check(TokenType.RIGHT_PAREN):
+                while True:
+                    args.append(self.expression())
+                    if not self.match(TokenType.COMMA):
+                        break
+            paren = self.consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
+            expr = Call(expr, paren, args)
+        return expr
+
 
     def primary(self):
         if self.match(TokenType.NUMBER, TokenType.STRING):

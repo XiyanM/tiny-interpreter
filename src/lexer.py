@@ -133,7 +133,7 @@ class Lexer:
     def string(self):
         while self.peek() != '"' and not self.is_at_end():
             if self.peek() == "\n":
-                raise SyntaxError(f"Unterminated string on line {self.line}")
+                self.line+=1
             self.advance()
 
         if self.is_at_end():

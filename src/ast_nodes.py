@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, List
 from .tokens import Token 
 
 
@@ -35,3 +35,9 @@ class Variable(Expr):
 class Assign(Expr):
     name: Token
     value: Expr
+
+@dataclass(frozen=True)
+class Call(Expr):
+    callee: Expr #Variable() which holds the function name
+    paren: Token #closing RIGHT_PAREN token, used for error handling
+    args: List[Expr]
