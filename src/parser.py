@@ -1,11 +1,23 @@
-from __future__ import annotations # type: ignore
+from __future__ import annotations  # type: ignore
 from typing import List
 from .tokens import Token, TokenType
 from .ast_nodes import Literal, Binary, Expr, Grouping, Unary, Variable, Assign, Call
-from .stmt_nodes import Statement, VarStmt, IfStmt, WhileStmt, BlockStmt, PrintStmt, FunctionStmt, ReturnStmt, ExprStmt
+from .stmt_nodes import (
+    Statement,
+    VarStmt,
+    IfStmt,
+    WhileStmt,
+    BlockStmt,
+    PrintStmt,
+    FunctionStmt,
+    ReturnStmt,
+    ExprStmt,
+)
+
 
 class ParseError(Exception):
     pass
+
 
 class Parser:
     def __init__(self, tokens: List[Token]):
@@ -19,15 +31,14 @@ class Parser:
             statements.append(self.declaration())
 
         return statements
-    
-    #statement grammar
+
+    # statement grammar
     def declaration(self) -> Statement:
         if self.match(TokenType.VAR):
             return self.var_declaration()
         if self.match(TokenType.FUN):
             return self.func_declaration()
         return self.statement()
-
 
     def statement(self) -> Statement:
         if self.match(TokenType.PRINT):
@@ -38,7 +49,9 @@ class Parser:
             return self.while_statement()
         if self.match(TokenType.LEFT_BRACE):
             return self.block()
-        
+        if self.match(TokenType.RETURN):
+            return self.return_statement()
+
         return self.expression_statement()
 
     def var_declaration(self) -> Statement:
@@ -47,37 +60,37 @@ class Parser:
         initialiser = None
         if self.match(TokenType.EQUAL):
             initialiser = self.expression()
-        
+
         self.consume(TokenType.SEMICOLON, "Expect ; after variable declaration")
         return VarStmt(name, initialiser)
-    
+
     def func_declaration(self) -> Statement:
         name = self.consume(TokenType.IDENTIFIER, "Expect fucntion name")
         param = []
         funcbody = []
 
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after function name.")
+
         if not self.check(TokenType.RIGHT_PAREN):
-            self.consume(TokenType.LEFT_PAREN, "Expect '(' after function name.")
             while True:
-                param.append(self.consume(TokenType.IDENTIFIER, "Expect parameter name."))
+                param.append(
+                    self.consume(TokenType.IDENTIFIER, "Expect parameter name.")
+                )
                 if not self.match(TokenType.COMMA):
                     break
 
         self.consume(TokenType.RIGHT_PAREN, "Expect ')' after function parameters.")
-
         self.consume(TokenType.LEFT_BRACE, "Expect '{' before function body.")
         funcbody = self.block()
 
         return FunctionStmt(name, param, funcbody.statements)
 
-
-    
     def print_statement(self) -> Statement:
         expression = self.expression()
         self.consume(TokenType.SEMICOLON, "Expect ; after value")
 
         return PrintStmt(expression)
-    
+
     def if_statement(self) -> Statement:
         self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
         condition = self.expression()
@@ -87,9 +100,9 @@ class Parser:
         else_branch = None
         if self.match(TokenType.ELSE):
             else_branch = self.statement()
-        
+
         return IfStmt(condition, then_branch, else_branch)
-    
+
     def while_statement(self) -> Statement:
         self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
         condition = self.expression()
@@ -98,7 +111,7 @@ class Parser:
         body = self.statement()
 
         return WhileStmt(condition, body)
-    
+
     def block(self) -> Statement:
         statements = []
         while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
@@ -107,23 +120,27 @@ class Parser:
         self.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
 
         return BlockStmt(statements)
-    
+
+    def return_statement(self) -> Statement:
+        keyword = self.previous()
+        value = None
+
+        if not self.check(TokenType.SEMICOLON):
+            value = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+        return ReturnStmt(keyword, value)
+
     def expression_statement(self) -> Statement:
         expr = self.expression()
         self.consume(TokenType.SEMICOLON, "expect ';' after expression.")
 
         return ExprStmt(expr)
-    
-    
 
-
-
-
-
-    #expression grammar
+    # expression grammar
     def expression(self) -> Expr:
         return self.assignment()
-    
+
     def assignment(self) -> Expr:
         expr = self.equality()
         if self.match(TokenType.EQUAL):
@@ -133,10 +150,9 @@ class Parser:
             if isinstance(expr, Variable):
                 name = expr.name
                 return Assign(name, value)
-            
+
             raise self.error(equals, "Invalid assignment target.")
         return expr
-
 
     def equality(self) -> Expr:
         expr = self.comparison()
@@ -145,19 +161,24 @@ class Parser:
             op = self.previous()
             right = self.comparison()
             expr = Binary(expr, op, right)
-        
+
         return expr
 
     def comparison(self) -> Expr:
         expr = self.term()
 
-        while self.match(TokenType.GREATER_EQUAL, TokenType.GREATER, TokenType.LESS, TokenType.LESS_EQUAL):
+        while self.match(
+            TokenType.GREATER_EQUAL,
+            TokenType.GREATER,
+            TokenType.LESS,
+            TokenType.LESS_EQUAL,
+        ):
             op = self.previous()
             right = self.term()
             expr = Binary(expr, op, right)
-        
+
         return expr
-        
+
     def term(self) -> Expr:
         expr = self.factor()
 
@@ -165,7 +186,7 @@ class Parser:
             op = self.previous()
             right = self.factor()
             expr = Binary(expr, op, right)
-        
+
         return expr
 
     def factor(self):
@@ -183,7 +204,7 @@ class Parser:
             right = self.unary()
             return Unary(op, right)
         return self.call()
-    
+
     def call(self):
         expr = self.primary()
         while self.match(TokenType.LEFT_PAREN):
@@ -198,7 +219,6 @@ class Parser:
             expr = Call(expr, paren, args)
         return expr
 
-
     def primary(self):
         if self.match(TokenType.NUMBER, TokenType.STRING):
             value = self.previous().literal
@@ -206,39 +226,37 @@ class Parser:
 
         if self.match(TokenType.TRUE):
             return Literal(True)
-        
+
         if self.match(TokenType.FALSE):
             return Literal(False)
-    
+
         if self.match(TokenType.NIL):
             return Literal(None)
-        
+
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN, "Expect ) after expression")
             return Grouping(expr)
-        
+
         if self.match(TokenType.IDENTIFIER):
             return Variable(self.previous())
-        
-        raise self.error(self.peek(), "Expect expression.")
-    
-        
 
-    #helper functions
+        raise self.error(self.peek(), "Expect expression.")
+
+    # helper functions
     def peek(self):
         return self.tokens[self.current]
-    
+
     def previous(self):
-        return self.tokens[self.current-1]
-    
+        return self.tokens[self.current - 1]
+
     def advance(self):
-        self.current+=1
+        self.current += 1
         return self.previous()
-    
+
     def is_at_end(self):
         return self.peek().type == TokenType.EOF
-    
+
     def match(self, *types: TokenType) -> bool:
         for t in types:
             if self.check(t):
@@ -251,15 +269,9 @@ class Parser:
             return self.advance()
         raise self.error(self.peek(), message)
 
-
-
     def error(self, token: Token, message: str) -> ParseError:
         where = "at end" if token.type == TokenType.EOF else f"at '{token.lexeme}'"
         return ParseError(f"[line {token.line}] Error {where}: {message}")
 
-    
     def check(self, t: TokenType):
         return self.peek().type == t
-    
-
-    

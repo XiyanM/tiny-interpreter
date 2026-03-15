@@ -3,8 +3,15 @@ from typing import List
 
 from .ast_nodes import Expr, Literal, Grouping, Binary, Unary, Variable, Assign
 from .stmt_nodes import (
-    Statement, PrintStmt, VarStmt, ExprStmt, BlockStmt, IfStmt, WhileStmt
+    Statement,
+    PrintStmt,
+    VarStmt,
+    ExprStmt,
+    BlockStmt,
+    IfStmt,
+    WhileStmt,
 )
+
 
 class AstPrinter:
     def print_program(self, statements: List[Statement]) -> str:

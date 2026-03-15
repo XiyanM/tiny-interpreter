@@ -3,8 +3,9 @@ from enum import Enum, auto
 from typing import Any
 from dataclasses import dataclass
 
+
 class TokenType(Enum):
-    #Keywords
+    # Keywords
     VAR = auto()
     PRINT = auto()
     TRUE = auto()
@@ -16,13 +17,12 @@ class TokenType(Enum):
     ELSE = auto()
     FUN = auto()
 
-
-    #Literals
+    # Literals
     IDENTIFIER = auto()
     STRING = auto()
     NUMBER = auto()
 
-    #Single-Character Tokens
+    # Single-Character Tokens
     LEFT_PAREN = auto()
     RIGHT_PAREN = auto()
     LEFT_BRACE = auto()
@@ -34,18 +34,19 @@ class TokenType(Enum):
     SEMICOLON = auto()
     SLASH = auto()
     STAR = auto()
-    BANG = auto() #!
-    LESS = auto() #<
-    GREATER = auto() #>
+    BANG = auto()  #!
+    LESS = auto()  # <
+    GREATER = auto()  # >
     EQUAL = auto()
 
-    #one or two char tokens
-    BANG_EQUAL = auto() # !=
-    EQUAL_EQUAL = auto() # ==
-    LESS_EQUAL = auto() #<=
-    GREATER_EQUAL = auto() #>=
-    
+    # one or two char tokens
+    BANG_EQUAL = auto()  # !=
+    EQUAL_EQUAL = auto()  # ==
+    LESS_EQUAL = auto()  # <=
+    GREATER_EQUAL = auto()  # >=
+
     EOF = auto()
+
 
 @dataclass(frozen=True)
 class Token:
@@ -56,9 +57,6 @@ class Token:
 
     def __repr__(self):
         return f"Token({self.type.name}, {self.lexeme!r}, {self.literal!r})"
-    
+
     def __str__(self):
         return self.__repr__()
-
-        
-

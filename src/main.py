@@ -7,6 +7,7 @@ from .interpreter import Interpreter
 DEBUG_TOKENS = False
 DEBUG_AST = False
 
+
 def run(source: str):
     scanner = Lexer(source)
     tokens = scanner.scan_tokens()
@@ -15,7 +16,7 @@ def run(source: str):
         for token in tokens:
             print(token)
         return
-    
+
     parser = Parser(tokens)
     statements = parser.parse()
 
@@ -23,7 +24,7 @@ def run(source: str):
         printer = AstPrinter()
         print(printer.print_program(statements))
         return
-    
+
     interpreter = Interpreter()
     interpreter.interpret(statements)
 

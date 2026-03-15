@@ -1,6 +1,7 @@
 from typing import List
 from .tokens import TokenType, Token
 
+
 class Lexer:
     def __init__(self, text):
         self.text = text
@@ -19,20 +20,20 @@ class Lexer:
             "if": TokenType.IF,
             "else": TokenType.ELSE,
             "while": TokenType.WHILE,
-            "fun": TokenType.FUN,        # if you included this TokenType
+            "fun": TokenType.FUN,  
             "return": TokenType.RETURN,
         }
 
     def is_at_end(self) -> bool:
-        return self.current >= len(self.text) 
-    
+        return self.current >= len(self.text)
+
     def advance(self):
         ch = self.text[self.current]
         self.current += 1
         return ch
-    
-    def add_token(self, token_type: TokenType , literal=None):
-        lexeme = self.text[self.start:self.current]
+
+    def add_token(self, token_type: TokenType, literal=None):
+        lexeme = self.text[self.start : self.current]
         self.tokens.append(Token(token_type, lexeme, literal, self.line))
 
     def scan_token(self):
@@ -95,18 +96,17 @@ class Lexer:
             else:
                 self.add_token(TokenType.EQUAL)
 
-
         else:
             raise SyntaxError(f"Unexpected character on line {self.line}")
-        
+
     def scan_tokens(self) -> List[Token]:
         while not self.is_at_end():
             self.start = self.current
             self.scan_token()
 
-        self.tokens.append(Token(TokenType.EOF, "", None, self.line))  
+        self.tokens.append(Token(TokenType.EOF, "", None, self.line))
         return self.tokens
-    
+
     def peek(self):
         if self.is_at_end():
             return "\0"
@@ -119,21 +119,21 @@ class Lexer:
             self.advance()
             while self.peek().isdigit():
                 self.advance()
-        lexeme = self.text[self.start:self.current]
+        lexeme = self.text[self.start : self.current]
         value = float(lexeme)
         self.add_token(TokenType.NUMBER, value)
 
     def identifier(self):
         while self.peek().isalnum() or self.peek() == "_":
             self.advance()
-        value = self.text[self.start:self.current]
+        value = self.text[self.start : self.current]
         token_type = self.keywords.get(value, TokenType.IDENTIFIER)
         self.add_token(token_type)
 
     def string(self):
         while self.peek() != '"' and not self.is_at_end():
             if self.peek() == "\n":
-                self.line+=1
+                self.line += 1
             self.advance()
 
         if self.is_at_end():
@@ -143,17 +143,3 @@ class Lexer:
 
         value = self.text[self.start + 1 : self.current - 1]
         self.add_token(TokenType.STRING, value)
-
-
-
-
-
-
-    
-
-
-
-    
-
-
-
